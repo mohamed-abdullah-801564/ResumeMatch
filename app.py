@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 from utils.file_processor import extract_text_from_file, validate_file_type
+from utils.nlp_analyzer import ResumeJobMatcher
 
 def main():
     # Set page configuration
@@ -9,6 +10,11 @@ def main():
         page_icon="📄",
         layout="wide"
     )
+    
+    # Initialize the NLP matcher
+    @st.cache_resource
+    def load_nlp_matcher():
+        return ResumeJobMatcher()
     
     # Main title
     st.title("AI Resume Match Checker")
@@ -100,6 +106,11 @@ def main():
                         st.error("Could not extract text from job description. Please check the file format and content.")
                         return
                     
+                    # Perform NLP analysis
+                    matcher = load_nlp_matcher()
+                    analysis_result = matcher.calculate_match_score(resume_text, job_desc_text)
+                    suggestions = matcher.generate_suggestions(analysis_result)
+                    
                     # Display results sections
                     st.markdown("---")
                     st.header("📊 Analysis Results")
@@ -110,30 +121,77 @@ def main():
                     with result_col1:
                         st.subheader("Resume Match Score")
                         
-                        # Placeholder score display
-                        score_placeholder = st.empty()
-                        with score_placeholder.container():
-                            st.metric(
-                                label="Match Score",
-                                value="Processing...",
-                                help="AI-powered compatibility score between resume and job description"
-                            )
-                            st.info("🤖 AI analysis will be implemented here")
+                        # Display actual match score
+                        overall_score = analysis_result['overall_score']
+                        
+                        # Determine score color based on value
+                        if overall_score >= 70:
+                            score_color = "green"
+                        elif overall_score >= 40:
+                            score_color = "orange"
+                        else:
+                            score_color = "red"
+                        
+                        # Display main score
+                        st.metric(
+                            label="Overall Match Score",
+                            value=f"{overall_score}%",
+                            help="Percentage of job description keywords found in your resume"
+                        )
+                        
+                        # Display detailed scores
+                        st.markdown("**Detailed Breakdown:**")
+                        st.write(f"🔧 Technical Skills: {analysis_result['technical_score']}%")
+                        st.write(f"💼 Soft Skills: {analysis_result['soft_skills_score']}%")
+                        st.write(f"📝 Keywords Matched: {analysis_result['total_matches']}/{analysis_result['total_job_keywords']}")
+                        
+                        # Score interpretation
+                        if overall_score >= 70:
+                            st.success("Excellent match! Your resume aligns well with the job requirements.")
+                        elif overall_score >= 40:
+                            st.warning("Good match with room for improvement.")
+                        else:
+                            st.error("Low match score. Consider tailoring your resume more closely to the job description.")
                     
                     with result_col2:
-                        st.subheader("Suggestions")
+                        st.subheader("Suggestions to Improve")
                         
-                        # Placeholder suggestions
-                        suggestions_placeholder = st.empty()
-                        with suggestions_placeholder.container():
-                            st.info("📝 AI-generated suggestions will appear here")
-                            st.markdown("""
-                            **Placeholder suggestions:**
-                            - Resume text extracted successfully ({} characters)
-                            - Job description text extracted successfully ({} characters)
-                            - AI matching algorithm integration pending
-                            - Detailed recommendations will be provided once AI service is connected
-                            """.format(len(resume_text), len(job_desc_text)))
+                        # Display generated suggestions
+                        for i, suggestion in enumerate(suggestions, 1):
+                            st.write(f"{i}. {suggestion}")
+                        
+                        # Display missing keywords
+                        if analysis_result['missing']['technical']:
+                            st.markdown("**🔧 Missing Technical Skills:**")
+                            missing_tech = list(analysis_result['missing']['technical'])[:8]
+                            st.write(", ".join(missing_tech))
+                        
+                        if analysis_result['missing']['soft_skills']:
+                            st.markdown("**💼 Missing Soft Skills:**")
+                            missing_soft = list(analysis_result['missing']['soft_skills'])[:5]
+                            st.write(", ".join(missing_soft))
+                    
+                    # Display matched keywords in an expander
+                    with st.expander("🔍 View Matched Keywords", expanded=False):
+                        col_matched, col_missing = st.columns(2)
+                        
+                        with col_matched:
+                            st.subheader("✅ Keywords Found")
+                            if analysis_result['matches']['technical']:
+                                st.write("**Technical:**")
+                                st.write(", ".join(list(analysis_result['matches']['technical'])[:10]))
+                            if analysis_result['matches']['soft_skills']:
+                                st.write("**Soft Skills:**")
+                                st.write(", ".join(list(analysis_result['matches']['soft_skills'])[:8]))
+                        
+                        with col_missing:
+                            st.subheader("❌ Keywords Missing")
+                            if analysis_result['missing']['technical']:
+                                st.write("**Technical:**")
+                                st.write(", ".join(list(analysis_result['missing']['technical'])[:10]))
+                            if analysis_result['missing']['soft_skills']:
+                                st.write("**Soft Skills:**")
+                                st.write(", ".join(list(analysis_result['missing']['soft_skills'])[:8]))
                     
                     # Display extracted text for verification (in expander)
                     with st.expander("📄 View Extracted Text (for verification)", expanded=False):
@@ -141,11 +199,11 @@ def main():
                         
                         with col_resume:
                             st.subheader("Resume Text")
-                            st.text_area("Extracted Resume Content", resume_text[:1000] + "..." if len(resume_text) > 1000 else resume_text, height=200, disabled=True)
+                            st.text_area("Extracted Resume Content", resume_text[:500] + "..." if len(resume_text) > 500 else resume_text, height=200, disabled=True)
                         
                         with col_job:
                             st.subheader("Job Description Text")
-                            st.text_area("Extracted Job Description Content", job_desc_text[:1000] + "..." if len(job_desc_text) > 1000 else job_desc_text, height=200, disabled=True)
+                            st.text_area("Extracted Job Description Content", job_desc_text[:500] + "..." if len(job_desc_text) > 500 else job_desc_text, height=200, disabled=True)
                 
                 except Exception as e:
                     st.error(f"An error occurred while processing the files: {str(e)}")

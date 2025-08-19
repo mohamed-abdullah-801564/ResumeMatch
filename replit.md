@@ -33,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 2. User provides job description via file upload or text input
 3. Files are validated for correct format
 4. Text content is extracted from uploaded documents
-5. Extracted content is processed for AI analysis (implementation pending)
+5. Extracted content is processed through NLP analysis for intelligent matching
 
 ## External Dependencies
 
@@ -41,12 +41,20 @@ Preferred communication style: Simple, everyday language.
 - **streamlit**: Web application framework for the user interface
 - **PyPDF2**: PDF text extraction and processing
 - **python-docx**: Microsoft Word document processing
+- **spacy**: Natural language processing library for keyword extraction and text analysis
+- **scikit-learn**: Machine learning library for NLP preprocessing support
 - **io**: Built-in library for handling byte streams
+
+### NLP Models
+- **en_core_web_sm**: English language model for spaCy NLP processing
 
 ### File Format Support
 - **PDF**: Document text extraction via PyPDF2
 - **DOCX**: Microsoft Word document processing via python-docx
 
-### Potential AI Integration
-- The architecture is prepared for AI service integration for resume-job matching analysis
-- Text extraction pipeline ready to feed processed content to AI models or APIs
+### AI Integration (Implemented)
+- **NLP Analysis Engine**: Implemented using spaCy for natural language processing
+- **Keyword Extraction**: Automated extraction of technical skills, soft skills, and general keywords
+- **Match Score Calculation**: Percentage-based scoring system comparing resume and job description keywords
+- **Intelligent Suggestions**: AI-generated recommendations for resume improvement
+- **Skills Categorization**: Automatic classification of technical vs soft skills
