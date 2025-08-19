@@ -33,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 2. User provides job description via file upload or text input
 3. Files are validated for correct format
 4. Text content is extracted from uploaded documents
-5. Extracted content is processed through NLP analysis for intelligent matching
+5. Extracted content is processed through enhanced NLP and semantic analysis for intelligent matching
 
 ## External Dependencies
 
@@ -56,7 +56,10 @@ Preferred communication style: Simple, everyday language.
 ### AI Integration (Implemented)
 - **NLP Analysis Engine**: Implemented using spaCy for natural language processing
 - **Keyword Extraction**: Automated extraction of technical skills, soft skills, and general keywords
-- **Match Score Calculation**: Percentage-based scoring system comparing resume and job description keywords
-- **Intelligent Suggestions**: AI-generated recommendations for resume improvement
+- **Semantic Analysis**: TF-IDF based semantic similarity analysis for conceptual matching beyond exact keywords
+- **Enhanced Match Scoring**: Combined keyword (60%) and semantic (40%) scoring for comprehensive evaluation
+- **Synonym Enhancement**: Skill synonym mapping for improved semantic matching
+- **Conceptual Gap Identification**: AI identification of missing conceptual areas and skill categories
+- **Intelligent Suggestions**: Enhanced AI-generated recommendations based on both keyword and semantic analysis
 - **Skills Categorization**: Automatic classification of technical vs soft skills
 - **PDF Report Generation**: Professional downloadable reports with detailed analysis and suggestions

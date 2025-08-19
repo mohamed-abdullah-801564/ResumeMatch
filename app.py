@@ -147,6 +147,19 @@ def main():
                         st.write(f"💼 Soft Skills: {analysis_result['soft_skills_score']}%")
                         st.write(f"📝 Keywords Matched: {analysis_result['total_matches']}/{analysis_result['total_job_keywords']}")
                         
+                        # Display enhanced scoring breakdown
+                        if 'semantic_score' in analysis_result:
+                            st.markdown("**Enhanced Analysis:**")
+                            st.write(f"🎯 Keyword Match: {analysis_result['keyword_score']}%")
+                            st.write(f"🧠 Semantic Similarity: {analysis_result['semantic_score']}%")
+                            
+                            # Show semantic insights
+                            semantic_data = analysis_result.get('semantic_analysis', {})
+                            if semantic_data.get('strong_matches'):
+                                st.write(f"✨ Strong Conceptual Matches: {len(semantic_data['strong_matches'])}")
+                            if semantic_data.get('conceptual_gaps'):
+                                st.write(f"⚠️ Conceptual Gaps: {len(semantic_data['conceptual_gaps'])}")
+                        
                         # Score interpretation
                         if overall_score >= 70:
                             st.success("Excellent match! Your resume aligns well with the job requirements.")
@@ -237,6 +250,24 @@ def main():
                             type="primary",
                             help="Download a detailed PDF report with your analysis results"
                         )
+                    
+                    # Display semantic analysis details
+                    if 'semantic_analysis' in analysis_result and analysis_result['semantic_analysis'].get('semantic_matches'):
+                        with st.expander("🧠 Semantic Analysis Details", expanded=False):
+                            semantic_data = analysis_result['semantic_analysis']
+                            
+                            if semantic_data.get('strong_matches'):
+                                st.subheader("💪 Strong Conceptual Matches")
+                                for match in semantic_data['strong_matches'][:5]:
+                                    st.write(f"**Job Requirement:** {match['job_sentence'][:100]}...")
+                                    st.write(f"**Your Experience:** {match['resume_sentence'][:100]}...")
+                                    st.write(f"**Similarity:** {match['similarity']:.2f}")
+                                    st.markdown("---")
+                            
+                            if semantic_data.get('conceptual_gaps'):
+                                st.subheader("🎯 Areas for Improvement")
+                                for gap in semantic_data['conceptual_gaps'][:3]:
+                                    st.write(f"• {gap}")
                     
                     # Display matched keywords in an expander
                     with st.expander("🔍 View Matched Keywords", expanded=False):

@@ -3,6 +3,7 @@ import re
 from collections import Counter
 from typing import List, Dict, Tuple, Set
 import string
+from .semantic_analyzer import SemanticResumeAnalyzer
 
 class ResumeJobMatcher:
     def __init__(self):
@@ -13,6 +14,9 @@ class ResumeJobMatcher:
             # Fallback if model not found
             print("spaCy model not found, using basic text processing")
             self.nlp = None
+        
+        # Initialize semantic analyzer
+        self.semantic_analyzer = SemanticResumeAnalyzer()
     
     def clean_text(self, text: str) -> str:
         """Clean and normalize text"""
@@ -128,32 +132,41 @@ class ResumeJobMatcher:
         }
     
     def calculate_match_score(self, resume_text: str, job_description_text: str) -> Dict:
-        """Calculate match score between resume and job description"""
+        """Calculate enhanced match score including semantic analysis"""
         
         # Extract keywords from both texts
         resume_keywords = self.extract_skills_and_keywords(resume_text)
         job_keywords = self.extract_skills_and_keywords(job_description_text)
         
-        # Calculate matches
+        # Calculate keyword matches
         technical_matches = resume_keywords['technical'].intersection(job_keywords['technical'])
         soft_skill_matches = resume_keywords['soft_skills'].intersection(job_keywords['soft_skills'])
         general_matches = resume_keywords['general'].intersection(job_keywords['general'])
         
-        # Calculate overall matches
+        # Calculate overall keyword matches
         all_job_keywords = job_keywords['all']
         all_resume_keywords = resume_keywords['all']
         all_matches = all_resume_keywords.intersection(all_job_keywords)
         
-        # Calculate scores
+        # Calculate keyword scores
         total_job_keywords = len(all_job_keywords)
         if total_job_keywords == 0:
-            overall_score = 0
+            keyword_score = 0
         else:
-            overall_score = (len(all_matches) / total_job_keywords) * 100
+            keyword_score = (len(all_matches) / total_job_keywords) * 100
         
         # Calculate category scores
         tech_score = (len(technical_matches) / max(len(job_keywords['technical']), 1)) * 100
         soft_score = (len(soft_skill_matches) / max(len(job_keywords['soft_skills']), 1)) * 100
+        
+        # Perform semantic analysis
+        semantic_analysis = self.semantic_analyzer.calculate_semantic_similarity(resume_text, job_description_text)
+        
+        # Calculate enhanced scores
+        enhanced_scores = self.semantic_analyzer.calculate_enhanced_match_score(
+            {'overall_score': keyword_score, 'technical_score': tech_score, 'soft_skills_score': soft_score},
+            semantic_analysis
+        )
         
         # Find missing keywords
         missing_technical = job_keywords['technical'] - resume_keywords['technical']
@@ -161,7 +174,9 @@ class ResumeJobMatcher:
         missing_general = job_keywords['general'] - resume_keywords['general']
         
         return {
-            'overall_score': round(overall_score, 1),
+            'overall_score': enhanced_scores['enhanced_overall_score'],
+            'keyword_score': round(keyword_score, 1),
+            'semantic_score': round(semantic_analysis['overall_semantic_similarity'], 1),
             'technical_score': round(tech_score, 1),
             'soft_skills_score': round(soft_score, 1),
             'matches': {
@@ -177,6 +192,8 @@ class ResumeJobMatcher:
             },
             'total_job_keywords': total_job_keywords,
             'total_matches': len(all_matches),
+            'semantic_analysis': semantic_analysis,
+            'enhanced_scoring': enhanced_scores,
             'keywords_found': {
                 'resume': resume_keywords,
                 'job': job_keywords
@@ -184,60 +201,69 @@ class ResumeJobMatcher:
         }
     
     def generate_suggestions(self, analysis_result: Dict) -> List[Dict[str, str]]:
-        """Generate detailed improvement suggestions based on analysis"""
+        """Generate enhanced suggestions based on keyword and semantic analysis"""
         suggestions = []
         
         missing = analysis_result['missing']
         scores = {
             'overall': analysis_result['overall_score'],
+            'keyword': analysis_result.get('keyword_score', analysis_result['overall_score']),
+            'semantic': analysis_result.get('semantic_score', 0),
             'technical': analysis_result['technical_score'],
             'soft_skills': analysis_result['soft_skills_score']
         }
         
-        # Overall score feedback
+        # Enhanced overall score feedback considering both keyword and semantic analysis
         if scores['overall'] >= 70:
-            suggestions.append({
-                'type': 'success',
-                'text': "Excellent work! Your resume shows strong alignment with the job requirements. You're well-positioned for this role."
-            })
+            if scores['semantic'] >= 60:
+                suggestions.append({
+                    'type': 'success',
+                    'text': "Outstanding! Your resume demonstrates both strong keyword alignment and conceptual understanding of the role requirements."
+                })
+            else:
+                suggestions.append({
+                    'type': 'success',
+                    'text': "Excellent keyword alignment! Consider adding more detailed descriptions to demonstrate deeper understanding of the concepts."
+                })
         elif scores['overall'] >= 40:
             suggestions.append({
                 'type': 'improvement',
-                'text': "Your resume shows good potential for this role. With some targeted improvements, you can significantly boost your match score."
+                'text': f"Good foundation with {scores['keyword']:.1f}% keyword match and {scores['semantic']:.1f}% conceptual alignment. Targeted improvements can significantly boost your score."
             })
         else:
             suggestions.append({
                 'type': 'focus',
-                'text': "This is a great opportunity to tailor your resume more closely to the job requirements. Small changes can make a big difference."
+                'text': "Significant opportunity for improvement in both keyword relevance and conceptual alignment with the job requirements."
             })
+        
+        # Generate semantic suggestions if available
+        if 'semantic_analysis' in analysis_result:
+            semantic_suggestions = self.semantic_analyzer.generate_semantic_suggestions(
+                analysis_result['semantic_analysis'], 
+                {'overall_score': scores['keyword']}
+            )
+            suggestions.extend(semantic_suggestions[:3])
         
         # Detailed technical skills suggestions
         if missing['technical'] and scores['technical'] < 80:
             tech_suggestions = self._generate_technical_suggestions(missing['technical'])
-            suggestions.extend(tech_suggestions[:3])  # Top 3 technical suggestions
+            suggestions.extend(tech_suggestions[:2])  # Limit for space
         
         # Detailed soft skills suggestions  
         if missing['soft_skills'] and scores['soft_skills'] < 80:
             soft_suggestions = self._generate_soft_skill_suggestions(missing['soft_skills'])
-            suggestions.extend(soft_suggestions[:2])  # Top 2 soft skill suggestions
+            suggestions.extend(soft_suggestions[:2])  # Limit for space
         
-        # General keyword suggestions
-        if missing['general'] and len(missing['general']) > 5:
-            general_suggestions = self._generate_general_suggestions(missing['general'])
-            suggestions.extend(general_suggestions[:2])  # Top 2 general suggestions
-        
-        # Strategic advice based on match level
-        if analysis_result['total_matches'] < 5:
+        # Strategic advice based on semantic vs keyword balance
+        if scores['keyword'] > scores['semantic'] + 20:
             suggestions.append({
                 'type': 'strategy',
-                'text': "Consider reviewing the job description carefully and incorporating more specific terminology throughout your resume sections."
+                'text': "Strong keyword coverage! Focus on providing more detailed examples and context to demonstrate deeper understanding of these skills."
             })
-        
-        # Add section-specific advice
-        if scores['overall'] < 50:
+        elif scores['semantic'] > scores['keyword'] + 20:
             suggestions.append({
                 'type': 'strategy',
-                'text': "Focus on three key areas: 1) Skills section - add relevant technical skills, 2) Experience section - use job-specific language, 3) Summary - highlight matching qualifications."
+                'text': "Good conceptual alignment! Incorporate more specific keywords and terminology from the job description to improve ATS compatibility."
             })
         
         return suggestions[:8]  # Limit to 8 suggestions
