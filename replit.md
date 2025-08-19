@@ -43,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **python-docx**: Microsoft Word document processing
 - **spacy**: Natural language processing library for keyword extraction and text analysis
 - **scikit-learn**: Machine learning library for NLP preprocessing support
+- **reportlab**: PDF generation library for creating downloadable analysis reports
 - **io**: Built-in library for handling byte streams
 
 ### NLP Models
@@ -58,3 +59,4 @@ Preferred communication style: Simple, everyday language.
 - **Match Score Calculation**: Percentage-based scoring system comparing resume and job description keywords
 - **Intelligent Suggestions**: AI-generated recommendations for resume improvement
 - **Skills Categorization**: Automatic classification of technical vs soft skills
+- **PDF Report Generation**: Professional downloadable reports with detailed analysis and suggestions

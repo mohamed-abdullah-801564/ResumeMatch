@@ -2,6 +2,8 @@ import streamlit as st
 import os
 from utils.file_processor import extract_text_from_file, validate_file_type
 from utils.nlp_analyzer import ResumeJobMatcher
+from utils.pdf_generator import ResumeAnalysisReportGenerator
+from datetime import datetime
 
 def main():
     # Set page configuration
@@ -199,6 +201,42 @@ def main():
                             
                             for item in action_items:
                                 st.markdown(item)
+                    
+                    # PDF Download Section
+                    st.markdown("---")
+                    col_download1, col_download2 = st.columns([2, 1])
+                    
+                    with col_download1:
+                        st.markdown("**📄 Download Your Analysis Report**")
+                        st.write("Get a comprehensive PDF report with your match score, missing skills, and personalized suggestions.")
+                    
+                    with col_download2:
+                        # Generate PDF report
+                        pdf_generator = ResumeAnalysisReportGenerator()
+                        
+                        # Prepare filename and job title for the report
+                        resume_filename = resume_file.name if resume_file else "Resume"
+                        job_title = "Job Position"  # Could be enhanced to extract from job description
+                        
+                        # Generate PDF
+                        pdf_bytes = pdf_generator.generate_report(
+                            analysis_result=analysis_result,
+                            suggestions=suggestions,
+                            resume_filename=resume_filename,
+                            job_title=job_title
+                        )
+                        
+                        # Create download button
+                        download_filename = f"resume_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                        
+                        st.download_button(
+                            label="📥 Download PDF Report",
+                            data=pdf_bytes,
+                            file_name=download_filename,
+                            mime="application/pdf",
+                            type="primary",
+                            help="Download a detailed PDF report with your analysis results"
+                        )
                     
                     # Display matched keywords in an expander
                     with st.expander("🔍 View Matched Keywords", expanded=False):
