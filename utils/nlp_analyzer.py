@@ -183,8 +183,8 @@ class ResumeJobMatcher:
             }
         }
     
-    def generate_suggestions(self, analysis_result: Dict) -> List[str]:
-        """Generate improvement suggestions based on analysis"""
+    def generate_suggestions(self, analysis_result: Dict) -> List[Dict[str, str]]:
+        """Generate detailed improvement suggestions based on analysis"""
         suggestions = []
         
         missing = analysis_result['missing']
@@ -194,32 +194,127 @@ class ResumeJobMatcher:
             'soft_skills': analysis_result['soft_skills_score']
         }
         
-        # Overall score suggestions
-        if scores['overall'] < 30:
-            suggestions.append("Your resume has low keyword overlap with the job description. Consider tailoring your resume more closely to the job requirements.")
-        elif scores['overall'] < 60:
-            suggestions.append("Your resume shows moderate alignment with the job. Adding more relevant keywords could improve your match score.")
+        # Overall score feedback
+        if scores['overall'] >= 70:
+            suggestions.append({
+                'type': 'success',
+                'text': "Excellent work! Your resume shows strong alignment with the job requirements. You're well-positioned for this role."
+            })
+        elif scores['overall'] >= 40:
+            suggestions.append({
+                'type': 'improvement',
+                'text': "Your resume shows good potential for this role. With some targeted improvements, you can significantly boost your match score."
+            })
         else:
-            suggestions.append("Great job! Your resume shows strong alignment with the job requirements.")
+            suggestions.append({
+                'type': 'focus',
+                'text': "This is a great opportunity to tailor your resume more closely to the job requirements. Small changes can make a big difference."
+            })
         
-        # Technical skills suggestions
-        if missing['technical'] and scores['technical'] < 70:
-            top_missing_tech = list(missing['technical'])[:5]
-            suggestions.append(f"Consider adding these technical skills to your resume: {', '.join(top_missing_tech)}")
+        # Detailed technical skills suggestions
+        if missing['technical'] and scores['technical'] < 80:
+            tech_suggestions = self._generate_technical_suggestions(missing['technical'])
+            suggestions.extend(tech_suggestions[:3])  # Top 3 technical suggestions
         
-        # Soft skills suggestions  
-        if missing['soft_skills'] and scores['soft_skills'] < 70:
-            top_missing_soft = list(missing['soft_skills'])[:3]
-            suggestions.append(f"Highlight these soft skills in your resume: {', '.join(top_missing_soft)}")
+        # Detailed soft skills suggestions  
+        if missing['soft_skills'] and scores['soft_skills'] < 80:
+            soft_suggestions = self._generate_soft_skill_suggestions(missing['soft_skills'])
+            suggestions.extend(soft_suggestions[:2])  # Top 2 soft skill suggestions
         
-        # General missing keywords
-        if missing['general']:
-            top_missing_general = list(missing['general'])[:5]
-            suggestions.append(f"Important keywords missing from your resume: {', '.join(top_missing_general)}")
+        # General keyword suggestions
+        if missing['general'] and len(missing['general']) > 5:
+            general_suggestions = self._generate_general_suggestions(missing['general'])
+            suggestions.extend(general_suggestions[:2])  # Top 2 general suggestions
         
-        # Match suggestions
-        total_matches = analysis_result['total_matches']
-        if total_matches < 5:
-            suggestions.append("Try to incorporate more job-specific terminology and requirements from the job description into your resume.")
+        # Strategic advice based on match level
+        if analysis_result['total_matches'] < 5:
+            suggestions.append({
+                'type': 'strategy',
+                'text': "Consider reviewing the job description carefully and incorporating more specific terminology throughout your resume sections."
+            })
         
-        return suggestions[:6]  # Limit to 6 suggestions
+        # Add section-specific advice
+        if scores['overall'] < 50:
+            suggestions.append({
+                'type': 'strategy',
+                'text': "Focus on three key areas: 1) Skills section - add relevant technical skills, 2) Experience section - use job-specific language, 3) Summary - highlight matching qualifications."
+            })
+        
+        return suggestions[:8]  # Limit to 8 suggestions
+    
+    def _generate_technical_suggestions(self, missing_technical: Set[str]) -> List[Dict[str, str]]:
+        """Generate specific suggestions for missing technical skills"""
+        suggestions = []
+        tech_list = list(missing_technical)[:5]
+        
+        # Mapping of skills to resume section suggestions
+        skill_suggestions = {
+            'python': "Add Python to your Skills section or mention Python projects in your Experience section (e.g., 'Developed automated scripts using Python')",
+            'java': "Include Java in your technical skills or describe Java-based projects in your Experience section",
+            'javascript': "Highlight JavaScript experience in your Skills section or mention web development projects using JavaScript",
+            'react': "Add React to your frontend skills or describe React applications you've built",
+            'sql': "Include SQL in your technical skills or mention database work in your Experience section (e.g., 'Queried databases using SQL')",
+            'aws': "Add AWS to your cloud skills or mention cloud infrastructure work in your Experience section",
+            'docker': "Include Docker in your DevOps skills or describe containerization experience",
+            'git': "Add Git to your version control skills or mention collaborative development experience",
+            'machine learning': "Include Machine Learning in your Skills section or describe ML projects in your Experience section",
+            'project management': "Highlight project management experience in your Experience section or add PM tools to your Skills section"
+        }
+        
+        for skill in tech_list:
+            skill_lower = skill.lower()
+            if skill_lower in skill_suggestions:
+                suggestions.append({
+                    'type': 'technical',
+                    'text': f"**{skill.title()}**: {skill_suggestions[skill_lower]}"
+                })
+            else:
+                suggestions.append({
+                    'type': 'technical', 
+                    'text': f"**{skill.title()}**: Consider adding this skill to your Skills section or describing related experience in your work history"
+                })
+        
+        return suggestions
+    
+    def _generate_soft_skill_suggestions(self, missing_soft_skills: Set[str]) -> List[Dict[str, str]]:
+        """Generate specific suggestions for missing soft skills"""
+        suggestions = []
+        soft_list = list(missing_soft_skills)[:3]
+        
+        soft_skill_suggestions = {
+            'leadership': "Demonstrate leadership by describing times you led teams, mentored colleagues, or took initiative on projects",
+            'communication': "Highlight communication skills by mentioning presentations, client interactions, or cross-team collaboration",
+            'teamwork': "Showcase teamwork through examples of collaborative projects or cross-functional work",
+            'problem solving': "Illustrate problem-solving abilities by describing challenges you've overcome or innovative solutions you've implemented",
+            'management': "Show management experience through examples of supervising others, managing projects, or overseeing processes",
+            'analytical': "Demonstrate analytical skills by mentioning data analysis, research projects, or systematic problem-solving approaches"
+        }
+        
+        for skill in soft_list:
+            skill_lower = skill.lower()
+            if skill_lower in soft_skill_suggestions:
+                suggestions.append({
+                    'type': 'soft_skill',
+                    'text': f"**{skill.title()}**: {soft_skill_suggestions[skill_lower]}"
+                })
+            else:
+                suggestions.append({
+                    'type': 'soft_skill',
+                    'text': f"**{skill.title()}**: Consider adding examples that demonstrate this skill in your Experience or Summary section"
+                })
+        
+        return suggestions
+    
+    def _generate_general_suggestions(self, missing_general: Set[str]) -> List[Dict[str, str]]:
+        """Generate suggestions for missing general keywords"""
+        suggestions = []
+        general_list = list(missing_general)[:4]
+        
+        for keyword in general_list:
+            if len(keyword) > 2:  # Only suggest meaningful keywords
+                suggestions.append({
+                    'type': 'keyword',
+                    'text': f"**{keyword.title()}**: Look for opportunities to naturally incorporate this term in your Experience or Skills sections"
+                })
+        
+        return suggestions

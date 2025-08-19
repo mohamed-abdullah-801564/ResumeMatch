@@ -154,22 +154,51 @@ def main():
                             st.error("Low match score. Consider tailoring your resume more closely to the job description.")
                     
                     with result_col2:
-                        st.subheader("Suggestions to Improve")
+                        st.subheader("Personalized Improvement Suggestions")
                         
-                        # Display generated suggestions
+                        # Display generated suggestions with improved formatting
                         for i, suggestion in enumerate(suggestions, 1):
-                            st.write(f"{i}. {suggestion}")
+                            suggestion_type = suggestion.get('type', 'general')
+                            suggestion_text = suggestion.get('text', '')
+                            
+                            # Style suggestions based on type
+                            if suggestion_type == 'success':
+                                st.success(f"🎉 {suggestion_text}")
+                            elif suggestion_type == 'technical':
+                                st.info(f"🔧 {suggestion_text}")
+                            elif suggestion_type == 'soft_skill':
+                                st.info(f"💼 {suggestion_text}")
+                            elif suggestion_type == 'keyword':
+                                st.info(f"📝 {suggestion_text}")
+                            elif suggestion_type == 'strategy':
+                                st.warning(f"💡 {suggestion_text}")
+                            else:
+                                st.write(f"**{i}.** {suggestion_text}")
                         
-                        # Display missing keywords
-                        if analysis_result['missing']['technical']:
-                            st.markdown("**🔧 Missing Technical Skills:**")
-                            missing_tech = list(analysis_result['missing']['technical'])[:8]
-                            st.write(", ".join(missing_tech))
+                        # Add motivational closing message
+                        if overall_score < 70:
+                            st.markdown("---")
+                            st.markdown("💪 **Remember**: Small, targeted changes to your resume can significantly improve your match score. Focus on the most relevant skills for this specific role!")
                         
-                        if analysis_result['missing']['soft_skills']:
-                            st.markdown("**💼 Missing Soft Skills:**")
-                            missing_soft = list(analysis_result['missing']['soft_skills'])[:5]
-                            st.write(", ".join(missing_soft))
+                        # Quick action items section
+                        if analysis_result['missing']['technical'] or analysis_result['missing']['soft_skills']:
+                            st.markdown("---")
+                            st.markdown("**Quick Action Items:**")
+                            
+                            action_items = []
+                            if analysis_result['missing']['technical']:
+                                top_tech = list(analysis_result['missing']['technical'])[:3]
+                                action_items.append(f"• Review your Skills section - consider adding: {', '.join(top_tech)}")
+                            
+                            if analysis_result['missing']['soft_skills']:
+                                top_soft = list(analysis_result['missing']['soft_skills'])[:2]
+                                action_items.append(f"• Enhance your Experience descriptions to highlight: {', '.join(top_soft)}")
+                            
+                            if len(analysis_result['matches']['all']) > 0:
+                                action_items.append("• Great job on the keywords you already have - keep those prominent!")
+                            
+                            for item in action_items:
+                                st.markdown(item)
                     
                     # Display matched keywords in an expander
                     with st.expander("🔍 View Matched Keywords", expanded=False):
