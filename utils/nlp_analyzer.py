@@ -3,7 +3,11 @@ import re
 from collections import Counter
 from typing import List, Dict, Tuple, Set
 import string
-from .semantic_analyzer import SemanticResumeAnalyzer
+try:
+    from .semantic_analyzer import SemanticResumeAnalyzer
+except ImportError:
+    # Fallback if semantic analyzer import fails
+    SemanticResumeAnalyzer = None
 
 class ResumeJobMatcher:
     def __init__(self):
@@ -16,7 +20,14 @@ class ResumeJobMatcher:
             self.nlp = None
         
         # Initialize semantic analyzer
-        self.semantic_analyzer = SemanticResumeAnalyzer()
+        if SemanticResumeAnalyzer:
+            try:
+                self.semantic_analyzer = SemanticResumeAnalyzer()
+            except Exception as e:
+                print(f"Warning: Could not initialize semantic analyzer: {e}")
+                self.semantic_analyzer = None
+        else:
+            self.semantic_analyzer = None
     
     def clean_text(self, text: str) -> str:
         """Clean and normalize text"""
@@ -159,14 +170,21 @@ class ResumeJobMatcher:
         tech_score = (len(technical_matches) / max(len(job_keywords['technical']), 1)) * 100
         soft_score = (len(soft_skill_matches) / max(len(job_keywords['soft_skills']), 1)) * 100
         
-        # Perform semantic analysis
-        semantic_analysis = self.semantic_analyzer.calculate_semantic_similarity(resume_text, job_description_text)
-        
-        # Calculate enhanced scores
-        enhanced_scores = self.semantic_analyzer.calculate_enhanced_match_score(
-            {'overall_score': keyword_score, 'technical_score': tech_score, 'soft_skills_score': soft_score},
-            semantic_analysis
-        )
+        # Perform semantic analysis if available
+        if self.semantic_analyzer:
+            try:
+                semantic_analysis = self.semantic_analyzer.calculate_semantic_similarity(resume_text, job_description_text)
+                enhanced_scores = self.semantic_analyzer.calculate_enhanced_match_score(
+                    {'overall_score': keyword_score, 'technical_score': tech_score, 'soft_skills_score': soft_score},
+                    semantic_analysis
+                )
+            except Exception as e:
+                print(f"Error in semantic analysis: {e}")
+                semantic_analysis = {'overall_semantic_similarity': 0, 'semantic_matches': [], 'missing_concepts': [], 'strong_matches': [], 'conceptual_gaps': []}
+                enhanced_scores = {'enhanced_overall_score': keyword_score}
+        else:
+            semantic_analysis = {'overall_semantic_similarity': 0, 'semantic_matches': [], 'missing_concepts': [], 'strong_matches': [], 'conceptual_gaps': []}
+            enhanced_scores = {'enhanced_overall_score': keyword_score}
         
         # Find missing keywords
         missing_technical = job_keywords['technical'] - resume_keywords['technical']
@@ -237,12 +255,15 @@ class ResumeJobMatcher:
             })
         
         # Generate semantic suggestions if available
-        if 'semantic_analysis' in analysis_result:
-            semantic_suggestions = self.semantic_analyzer.generate_semantic_suggestions(
-                analysis_result['semantic_analysis'], 
-                {'overall_score': scores['keyword']}
-            )
-            suggestions.extend(semantic_suggestions[:3])
+        if 'semantic_analysis' in analysis_result and self.semantic_analyzer:
+            try:
+                semantic_suggestions = self.semantic_analyzer.generate_semantic_suggestions(
+                    analysis_result['semantic_analysis'], 
+                    {'overall_score': scores['keyword']}
+                )
+                suggestions.extend(semantic_suggestions[:3])
+            except Exception as e:
+                print(f"Error generating semantic suggestions: {e}")
         
         # Detailed technical skills suggestions
         if missing['technical'] and scores['technical'] < 80:
