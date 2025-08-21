@@ -1,0 +1,55 @@
+ Slow network is detected. See <URL> for more details. Fallback font will be used while loading: <URL>
+15The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.Understand this error
+15The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?Understand this error
+15The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.Understand this error
+/~:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.Understand this error
+/~:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?Understand this error
+/~:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.Understand this error
+_app-202a92d26d3c72f4.js:sourcemap:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-202a92d26d3c72f4.js:sourcemap:13 [LaunchDarkly] LaunchDarkly client initialized
+analytics.tiktok.com/i18n/pixel/events.js?sdkid=D004GE3C77U8PIVDSDJG&lib=ttq:1  Failed to load resource: net::ERR_CONNECTION_TIMED_OUTUnderstand this error
+ResumeMatch:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+6Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.Understand this error
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'battery'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-68518b1ed25ae2b6.js:sourcemap:1Understand this warning
+framework-68518b1ed25ae2b6.js:sourcemap:1 Allow attribute will take precedence over 'allowpaymentrequest'.
