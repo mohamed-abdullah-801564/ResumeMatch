@@ -155,7 +155,13 @@ class ResumeAnalysisReportGenerator:
         story.append(Paragraph("Personalized Improvement Suggestions", self.header_style))
         
         for i, suggestion in enumerate(suggestions, 1):
-            suggestion_text = suggestion.get('text', '')
+            # Handle both dict and string formats for suggestions
+            if isinstance(suggestion, dict):
+                suggestion_text = suggestion.get('text', '')
+            else:
+                # If suggestion is a string (fallback)
+                suggestion_text = str(suggestion)
+            
             # Clean up the text for PDF (remove markdown formatting)
             clean_text = suggestion_text.replace('**', '').replace('*', '')
             suggestion_para = Paragraph(f"{i}. {clean_text}", self.suggestion_style)
