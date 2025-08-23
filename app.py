@@ -200,6 +200,9 @@ def add_custom_css():
         position: relative;
         width: 180px;
         height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .gauge-background {
@@ -220,12 +223,20 @@ def add_custom_css():
 
     .gauge-text {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 2rem;
         font-weight: 700;
         color: var(--text-primary);
+    }
+
+    .gauge-percentage {
+        display: block;
     }
 
     .gauge-label {
@@ -431,7 +442,9 @@ def create_circular_gauge(score, label="Match Score"):
                     stroke-dasharray="{circumference}" 
                     stroke-dashoffset="{circumference - progress}"></circle>
             </svg>
-            <div class="gauge-text">{score:.0f}%</div>
+            <div class="gauge-text">
+                <span class="gauge-percentage">{score:.0f}%</span>
+            </div>
         </div>
         <div class="gauge-label">{label}</div>
     </div>
